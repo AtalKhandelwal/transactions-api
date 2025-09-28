@@ -70,7 +70,7 @@ func (h *TransactionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	normalized := service.NormalizeAmount(req.OperationTypeID, req.Amount)
-	
+	normalized = math.Round(normalized*100) / 100
 
 	txn, err := h.Transactions.Create(r.Context(), repository.Transaction{
 		AccountID:       req.AccountID,
