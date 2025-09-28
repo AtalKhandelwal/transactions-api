@@ -8,6 +8,8 @@ import (
 
 	"github.com/atalkhandelwal/transactions-api/internal/config"
 	dbpkg "github.com/atalkhandelwal/transactions-api/internal/db"
+	httpapi "github.com/atalkhandelwal/transactions-api/internal/httpapi"
+	postgresrepo "github.com/atalkhandelwal/transactions-api/internal/repository/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -31,15 +33,20 @@ func main() {
 	}
 	defer pool.Close()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthc", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok"))
+	accountsRepo := postgresrepo.NewAccountRepo(pool)
+	opsRepo := postgresrepo.NewOperationRepo(pool)
+	txsRepo := postgresrepo.NewTransactionRepo(pool)
+
+	//router constructs handlers internally
+	r := httpapi.NewRouter(httpapi.Deps{
+		Accounts: accountsRepo,
+		Ops:      opsRepo,
+		Tx:       txsRepo,
 	})
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatal(err)
 	}
 }
