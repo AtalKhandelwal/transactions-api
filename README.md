@@ -20,7 +20,7 @@ API on **http://localhost:8080**.
 
 ### Health check
 ```bash
-curl http://localhost:8080/healthz
+curl http://localhost:8080/healthc
 ```
 
 ### Create an account
